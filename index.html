@@ -5018,6 +5018,23 @@ async function generateAIBrief(handover, container, insertAfterEl) {
     const textContext = [handover.outstanding_hazards, handover.gas_concerns, handover.general_notes].join(" | ");
 
     // TODO: In production, send `textContext` to your Python backend / API endpoint here using fetch()
+    const textContext = [handover.outstanding_hazards, handover.gas_concerns, handover.general_notes].join(" | ");
+
+    // Send the data to your secure Netlify Function
+    const response = await fetch('/.netlify/functions/flowise-bridge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ textContext: textContext })
+    });
+
+    if (!response.ok) throw new Error("API request failed");
+    
+    // The Netlify function returns the clean, parsed JSON
+    const aiAnalysis = await response.json();
+    
+    // Render the UI
+    renderAIBrief(aiAnalysis, aiCard);
+
 
     // MOCKING the AI Response for the frontend prototype:
     setTimeout(() => {

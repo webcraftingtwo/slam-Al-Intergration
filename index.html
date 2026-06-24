@@ -1147,7 +1147,77 @@
     cursor:pointer;text-decoration:underline;text-underline-offset:3px;
   }
   .bct-skip:hover{color:rgba(255,255,255,0.6);}
-
+  
+  /* ══════ AI INTELLIGENCE LAYER ══════ */
+  .ai-brief-card {
+    background: var(--teal-pale);
+    border: 1.5px solid var(--teal);
+    border-left: 4px solid var(--accent);
+    border-radius: 4px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.3s ease;
+  }
+  .ai-brief-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+  }
+  .ai-brief-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--teal-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .ai-badge {
+    background: var(--amber);
+    color: #fff;
+    font-size: 0.52rem;
+    font-weight: 800;
+    padding: 0.15rem 0.45rem;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+  }
+  .ai-risk-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0.8rem 0;
+  }
+  .ai-risk-score {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--teal-dark);
+    background: var(--white);
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--border);
+  }
+  .ai-risk-score.high { color: var(--red); border-color: var(--red); background: #FEF0EE; }
+  .ai-risk-score.med { color: var(--amber); border-color: var(--amber); background: #FFF4E0; }
+  .ai-risk-text { font-size: 0.72rem; color: var(--text); line-height: 1.5; }
+  .ai-bullet { font-size: 0.68rem; color: var(--mid); margin-bottom: 0.35rem; padding-left: 0.5rem; border-left: 2px solid var(--border); }
+  .ai-gate-btns { display: flex; gap: 0.5rem; margin-top: 0.85rem; }
+  .btn-ai-ack {
+    flex: 1; background: var(--teal); color: #fff; border: none; padding: 0.65rem;
+    font-family: 'Montserrat', sans-serif; font-size: 0.65rem; font-weight: 800; 
+    text-transform: uppercase; letter-spacing: 0.1em; border-radius: 3px; cursor: pointer; transition: background 0.15s;
+  }
+  .btn-ai-ack:hover { background: var(--teal-dark); }
+  .btn-ai-override {
+    flex: 1; background: transparent; border: 1.5px solid var(--red); color: var(--red);
+    padding: 0.65rem; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; 
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-radius: 3px; cursor: pointer;
+  }
+  .btn-ai-override:hover { background: var(--red); color: #fff; }
 </style>
 </head>
 <body>
@@ -2263,6 +2333,7 @@ let barringDownDone = null; // null | 'yes' | 'no'
 let timerExceeded = false;
 let fogLightStatus = null; // null | 'green' | 'red'
 let sessionId = null; // unique ID for this procedure session
+let aiBriefAcknowledged = false // Human-gate validation track
 
 // db starts null -- initialized safely after DOM loads
 let db = null;
@@ -2908,6 +2979,18 @@ function tryGoPhase(n){if(n<=currentPhase)showPhase(n);}
 
 function nextPhase(){
   if(currentPhase>=5){submitProcedure();return;}
+   // --- NEW AI GATE LOCK ---
+  if(currentPhase === 0 && document.getElementById('ai-brief-layer') && !aiBriefAcknowledged){
+    const eb = document.getElementById('err0');
+    const el = document.getElementById('err0-list');
+    if(eb && el){ 
+      el.innerHTML = '• You must explicitly Acknowledge or Override the AI Handover Brief before proceeding.'; 
+      eb.classList.add('show'); 
+    }
+    document.getElementById('ai-brief-layer').scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  // ------------------------
 
   // Enforce 2-hour lapse on Phase 0 only if blast time entered AND standard re-entry
   if(currentPhase === 0){
@@ -4241,30 +4324,32 @@ async function loadIncomingHandover(){
 }
 
 function showHandoverBanner(handover){
-  // Insert banner before Phase 1 content
   const phase0 = document.getElementById('pp0');
   if(!phase0) return;
+  const phaseBody = phase0.querySelector('.ph-body');
+  if(!phaseBody) return;
 
+  // 1. Render the standard raw note block
   const banner = document.createElement('div');
   banner.className = 'handover-banner';
+  banner.id = 'raw-handover-banner';
+  banner.style.marginBottom = '0.5rem';
   banner.innerHTML = `
     <div class="handover-banner-head">
-      <div class="handover-banner-ttl">📋 Shift Handover from ${handover.officer_name||'Previous Officer'}</div>
-      <div class="handover-banner-new">NEW</div>
+      <div class="handover-banner-ttl">📋 Raw Handover from ${handover.officer_name||'Previous Shift'}</div>
+      <div class="handover-banner-new">RAW DATA</div>
     </div>
     <div class="handover-banner-body">
       ${handover.outstanding_hazards ? '<strong>Hazards:</strong> ' + handover.outstanding_hazards + '<br>' : ''}
-      ${handover.gas_concerns        ? '<strong>Gas Concerns:</strong> ' + handover.gas_concerns + '<br>' : ''}
-      ${handover.panels_avoid        ? '<strong>Panels to Avoid:</strong> ' + handover.panels_avoid + '<br>' : ''}
-      ${handover.general_notes       ? '<strong>Notes:</strong> ' + handover.general_notes : ''}
-      <div style="margin-top:0.4rem;font-size:0.6rem;color:var(--teal);font-weight:700;letter-spacing:0.08em;">Tap to dismiss · ${handover.shift_type||''} shift · ${handover.shift_date||''}</div>
+      ${handover.gas_concerns ? '<strong>Gas Concerns:</strong> ' + handover.gas_concerns + '<br>' : ''}
+      ${handover.panels_avoid ? '<strong>Panels to Avoid:</strong> ' + handover.panels_avoid + '<br>' : ''}
+      ${handover.general_notes ? '<strong>Notes:</strong> ' + handover.general_notes : ''}
     </div>
   `;
-  banner.onclick = () => banner.remove();
+  phaseBody.insertBefore(banner, phaseBody.firstChild);
 
-  // Insert at top of phase 0 body
-  const phaseBody = phase0.querySelector('.ph-body');
-  if(phaseBody) phaseBody.insertBefore(banner, phaseBody.firstChild);
+  // 2. Trigger the AI Engine right below it
+  generateAIBrief(handover, phaseBody, banner);
 }
 
 // ══ 2-HOUR LAPSE FUNCTIONS ══
@@ -4911,7 +4996,104 @@ async function syncBordQueue(){
     }
   }catch(e){ console.warn('Bord queue sync (non-fatal):', e); }
 }
+async function generateAIBrief(handover, container, insertAfterEl) {
+  aiBriefAcknowledged = false; // Lock Phase 1
+  
+  const aiCard = document.createElement('div');
+  aiCard.className = 'ai-brief-card';
+  aiCard.id = 'ai-brief-layer';
+  aiCard.innerHTML = `
+    <div class="ai-brief-header">
+      <span class="ai-brief-title">✨ AI Shift Handover Intelligence Brief</span>
+      <span class="ai-badge" style="background:var(--muted);">PROCESSING...</span>
+    </div>
+    <div class="ai-risk-text" style="font-style: italic; color: var(--mid);">
+      Parsing shift texts, extracting hazards, and checking geological baselines...
+    </div>
+  `;
+  container.insertBefore(aiCard, insertAfterEl.nextSibling);
 
+  try {
+    // Fusing text data for the API payload
+    const textContext = [handover.outstanding_hazards, handover.gas_concerns, handover.general_notes].join(" | ");
+
+    // TODO: In production, send `textContext` to your Python backend / API endpoint here using fetch()
+
+    // MOCKING the AI Response for the frontend prototype:
+    setTimeout(() => {
+      const mockAnalysis = {
+        riskScore: 72,
+        classification: 'HIGH RISK',
+        watchpoints: [
+          "Extracted critical reference to unresolved hangings in the current sector.",
+          "Live sensor cross-examination indicates micro-seismic clustering.",
+          "Recommendation: Proceed with strict barring down deployment metrics."
+        ]
+      };
+      renderAIBrief(mockAnalysis, aiCard);
+    }, 1500);
+
+  } catch (err) {
+    console.error("AI Layer failed:", err);
+    aiCard.innerHTML = `<div class="ai-risk-text" style="color: var(--red);">AI analysis currently offline. Standard manual safety gates remain fully enforced.</div>`;
+    aiBriefAcknowledged = true; // Fail open to prevent blocking operations
+  }
+}
+
+function renderAIBrief(analysis, cardElement) {
+  const scoreClass = analysis.riskScore >= 70 ? 'high' : (analysis.riskScore >= 40 ? 'med' : '');
+  
+  cardElement.innerHTML = `
+    <div class="ai-brief-header">
+      <span class="ai-brief-title">✨ AI Shift Handover Intelligence Brief</span>
+      <span class="ai-badge">ANALYSIS COMPLETE</span>
+    </div>
+    <div class="ai-risk-row">
+      <div class="ai-risk-score ${scoreClass}">${analysis.riskScore}</div>
+      <div class="ai-risk-text">
+        <strong>Calculated Re-Entry Risk Score (RERS)</strong><br>
+        Classification: <span style="font-weight:800; color:${analysis.riskScore >= 70 ? 'var(--red)' : 'var(--teal)'}">${analysis.classification}</span>
+      </div>
+    </div>
+    <div style="font-weight:800; font-size:0.6rem; color:var(--teal); text-transform:uppercase; margin-bottom:0.4rem;">Key Findings & Watchpoints:</div>
+    <div>
+      ${analysis.watchpoints.map(wp => `<div class="ai-bullet">${wp}</div>`).join('')}
+    </div>
+    <div class="ai-gate-btns" id="ai-gate-btns">
+      <button class="btn-ai-ack" onclick="acknowledgeAIBrief(false)">Acknowledge</button>
+      <button class="btn-ai-override" onclick="acknowledgeAIBrief(true)">Override Score</button>
+    </div>
+  `;
+}
+
+function acknowledgeAIBrief(isOverride) {
+  if (isOverride) {
+    const reason = prompt("Enter explicit reasoning for overriding the AI Re-Entry Risk Score:");
+    if (!reason || reason.trim() === "") {
+      alert("A documented human reason is strictly mandatory to override the AI risk barrier.");
+      return;
+    }
+    // Push the override note to the overall remarks in Phase 6 so it gets submitted to Supabase
+    const remarksBox = document.getElementById('overall-remarks');
+    if (remarksBox) {
+        remarksBox.value = `[AI OVERRIDE RERS] Reason: ${reason}\n\n` + remarksBox.value;
+    }
+  }
+
+  aiBriefAcknowledged = true;
+  
+  // Visual affirmation
+  const card = document.getElementById('ai-brief-layer');
+  if (card) {
+    card.style.background = 'rgba(39,174,96,0.06)';
+    card.style.borderColor = 'var(--green)';
+    card.querySelector('.ai-badge').textContent = 'VERIFIED BY OVERSEER';
+    card.querySelector('.ai-badge').style.background = 'var(--green)';
+    document.getElementById('ai-gate-btns').style.display = 'none';
+  }
+  
+  showPhaseToast("✨ AI brief verified. Preparation phase unlocked.");
+}
 </script>
 </body>
 </html>

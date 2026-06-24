@@ -1221,7 +1221,7 @@
       </div>
       <div class="fg">
         <label>Badge / Employee ID</label>
-        <input type="text" id="reset-badge" placeholder="e.g. VM-00214"/>
+        <input type="text" id="reset-badge" placeholder="e.g. 80046545"/>
       </div>
       <button class="btn-signin" id="btn-reset" onclick="requestPasswordReset()">
         <span>Send Reset Request</span>
@@ -1243,7 +1243,7 @@
       <div class="fg-row">
         <div class="fg">
           <label>Badge / Employee ID</label>
-          <input type="text" id="su-badge" placeholder="VM-00214" oninput="validateBadgeId(this)" autocomplete="off"/>
+          <input type="text" id="su-badge" placeholder="80046545" oninput="validateBadgeId(this)" autocomplete="off"/>
           <div class="badge-hint" id="badge-hint">Format: letters + numbers e.g. VM-00214</div>
         </div>
         <div class="fg">
@@ -1323,16 +1323,17 @@
   <!-- PHASE SAVE TOAST -->
   <div class="phase-toast" id="phase-toast">✓ Phase saved</div>
 
-  <!-- PILOT MODE BANNER -->
+  <!-- PILOT MODE BANNER 
   <div class="pilot-banner">
     <span class="pilot-txt">⚠ PILOT MODE — Complete paper form alongside this app</span>
     <span class="pilot-badge">PILOT v1.0.0</span>
   </div>
+  -->
 
   <!-- IRT PERSISTENT BAR — shown across all phases when IRT mode is active -->
   <div class="irt-persist-bar" id="irt-persist-bar">
-    <span class="irt-persist-badge">🚨 IRT</span>
-    <span class="irt-persist-txt">Immediate Response Team — 2-Hour Lapse Bypassed</span>
+    <span class="irt-persist-badge">🚨 IR</span>
+    <span class="irt-persist-txt">Immediate Re-Entry — 2-Hour Lapse Bypassed</span>
   </div>
 
   <!-- CONNECTION BAR -->
@@ -1518,7 +1519,7 @@
           </div>
           <div class="reentry-type-btn" id="rt-irt" onclick="setReentryType('irt')">
             <span class="rt-icon">🚨</span>
-            <span class="rt-label">Immediate Response Team</span>
+            <span class="rt-label">Immediate Re-Entry Team</span>
             <span class="rt-sub">2-hour lapse bypassed</span>
           </div>
         </div>
@@ -1591,7 +1592,7 @@
           </div>
           <div class="reentry-type-btn" id="rt-irt" onclick="setReentryType('irt')">
             <span class="rt-icon">🚨</span>
-            <span class="rt-label">Immediate Response Team</span>
+            <span class="rt-label">Immediate Re-Entry Team</span>
             <span class="rt-sub">2-hour lapse bypassed</span>
           </div>
         </div>
@@ -1734,7 +1735,7 @@
           </div>
           <div class="reentry-type-btn" id="rt-irt" onclick="setReentryType('irt')">
             <span class="rt-icon">🚨</span>
-            <span class="rt-label">Immediate Response Team</span>
+            <span class="rt-label">Immediate Re-Entry Team</span>
             <span class="rt-sub">2-hour lapse bypassed</span>
           </div>
         </div>
@@ -1850,10 +1851,10 @@
           <div class="ci" id="p3c4" onclick="tick('p3c4')"><div class="cbox"></div><div class="ctxt">Procedure repeated as far as safe and practical</div></div>
         </div>
         <div class="nb"><strong>NB: NO ONE MUST WORK UNDER UNSUPPORTED GROUND.</strong> Non-negotiable per Valterra operational procedure UNK-MIN-MIN-PRO-0002.</div>
-        <div class="slbl">Water Blast Duration</div>
+        <!-- <div class="slbl">Water Blast Duration</div>
         <div class="gas-f" style="max-width:220px;"><label>Duration Run (minutes)</label><input type="number" placeholder="15" min="15" id="water-dur"/><div class="gas-unit">Minimum 15 minutes required</div></div>
         <div class="slbl">Ground Conditions / Observations</div>
-        <textarea id="ground-obs-txt" placeholder="Describe ground conditions, hangings found, areas barred, any abnormalities..."></textarea>
+        <textarea id="ground-obs-txt" placeholder="Describe ground conditions, hangings found, areas barred, any abnormalities..."></textarea> -->
 
         <!-- BARRING DOWN CONFIRMATION -->
         <div class="slbl">Barring Down Confirmation</div>
@@ -1920,7 +1921,7 @@
         <div class="slbl" style="margin-top:1rem;">Sign-Off</div>
         <div class="so-card">
           <div class="so-row">
-            <label>Overseer Miner / Submitting Officer</label>
+            <label>Overseer Miner / Submitting Miner</label>
             <div class="sig-box" id="sig1" onclick="doSign('sig1','sig1-txt',true)"><span id="sig1-txt">Tap to confirm your identity</span></div>
           </div>
           <div class="so-div"></div>
